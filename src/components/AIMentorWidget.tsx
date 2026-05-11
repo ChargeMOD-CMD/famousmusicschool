@@ -34,7 +34,7 @@ export function AIMentorWidget() {
           <span className="absolute inset-0 rounded-full bg-gradient-aurora animate-pulse-ring" />
           <span className="absolute inset-0 rounded-full bg-gradient-aurora animate-pulse-ring" style={{ animationDelay: "0.6s" }} />
           <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-aurora shadow-glow-violet text-[oklch(0.13_0.04_270)]">
-            <Sparkles size={22} />
+            <Music4 size={22} />
           </span>
         </button>
       )}
@@ -44,7 +44,7 @@ export function AIMentorWidget() {
           <div className="flex items-center justify-between p-4 border-b border-border/60">
             <div className="flex items-center gap-2.5">
               <span className="relative h-9 w-9 grid place-items-center rounded-full bg-gradient-aurora text-[oklch(0.13_0.04_270)]">
-                <Sparkles size={16} />
+                <Music4 size={16} />
               </span>
               <div>
                 <div className="text-sm font-semibold leading-tight">FAMOUS Mentor</div>
