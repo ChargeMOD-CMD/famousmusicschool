@@ -17,30 +17,33 @@ export function RhythmCursor() {
     let mx = window.innerWidth / 2;
     let my = window.innerHeight / 2;
     let ox = mx, oy = my;
+    let rx = mx, ry = my;
     const trail = Array(6).fill(0).map(() => ({ x: mx, y: my }));
 
     const handleMove = (e: MouseEvent) => {
       mx = e.clientX;
       my = e.clientY;
+      // Orb follows pointer instantly for 1:1 smooth feel
+      if (orbRef.current) orbRef.current.style.transform = `translate3d(${mx - 10}px, ${my - 10}px, 0)`;
       const t = e.target as HTMLElement;
       const interactive = !!t.closest('a, button, [data-cursor="hover"]');
       setHovering(interactive);
     };
 
-    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mousemove", handleMove, { passive: true });
 
     let raf = 0;
     const tick = () => {
-      ox += (mx - ox) * 0.22;
-      oy += (my - oy) * 0.22;
-      if (orbRef.current) orbRef.current.style.transform = `translate3d(${ox - 10}px, ${oy - 10}px, 0)`;
-      if (ringRef.current) ringRef.current.style.transform = `translate3d(${ox - 24}px, ${oy - 24}px, 0)`;
+      ox = mx; oy = my;
+      rx += (mx - rx) * 0.35;
+      ry += (my - ry) * 0.35;
+      if (ringRef.current) ringRef.current.style.transform = `translate3d(${rx - 24}px, ${ry - 24}px, 0)`;
 
       // trail
       let px = ox, py = oy;
       for (let i = 0; i < trail.length; i++) {
-        trail[i].x += (px - trail[i].x) * 0.35;
-        trail[i].y += (py - trail[i].y) * 0.35;
+        trail[i].x += (px - trail[i].x) * 0.45;
+        trail[i].y += (py - trail[i].y) * 0.45;
         const el = trailRef.current[i];
         if (el) el.style.transform = `translate3d(${trail[i].x - 3}px, ${trail[i].y - 3}px, 0)`;
         px = trail[i].x;
