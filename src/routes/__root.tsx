@@ -9,24 +9,21 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
+import { RhythmCursor } from "@/components/RhythmCursor";
+import { AIMentorWidget } from "@/components/AIMentorWidget";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <div className="font-bebas text-[120px] leading-none text-gradient-aurora">404</div>
+        <h2 className="mt-2 font-display text-xl">This track doesn't exist</h2>
+        <p className="mt-2 text-sm text-muted-foreground">The page you're searching for is off-key. Let's find your rhythm.</p>
+        <Link to="/" className="mt-6 inline-flex items-center rounded-full bg-gradient-aurora px-5 py-2 text-sm font-semibold text-[oklch(0.13_0.04_270)]">
+          Back to Stage
+        </Link>
       </div>
     </div>
   );
@@ -35,32 +32,14 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <h1 className="font-display text-2xl">A note went out of tune</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <div className="mt-5 flex justify-center gap-2">
+          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-full bg-gradient-aurora px-5 py-2 text-sm font-semibold text-[oklch(0.13_0.04_270)]">Try again</button>
+          <a href="/" className="rounded-full glass px-5 py-2 text-sm">Go home</a>
         </div>
       </div>
     </div>
@@ -72,21 +51,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "The Famous Music School — Feel The Rhythm. Become The Music." },
+      { name: "description", content: "A futuristic music academy in Chennai nurturing creativity, performance, and artistic excellence — instruments, vocals, production, and AI-guided learning." },
+      { property: "og:title", content: "The Famous Music School" },
+      { property: "og:description", content: "Feel The Rhythm. Become The Music. Chennai's immersive next-generation music academy." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -110,10 +82,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <RhythmCursor />
+      <div className="relative min-h-screen grid-bg">
+        <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-stage" />
+        <Nav />
+        <Outlet />
+        <Footer />
+        <AIMentorWidget />
+      </div>
     </QueryClientProvider>
   );
 }
