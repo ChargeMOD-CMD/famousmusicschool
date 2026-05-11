@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, X, Send } from "lucide-react";
+import { Music4, X, Send } from "lucide-react";
 import { Equalizer } from "./Equalizer";
 
 const seedMessages = [
