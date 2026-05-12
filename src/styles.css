@@ -107,10 +107,7 @@
     color: oklch(0.98 0.01 250);
   }
 
-  /* Hide native cursor on desktop for the custom one */
-  @media (hover: hover) and (pointer: fine) {
-    body, a, button { cursor: none; }
-  }
+  /* Custom cursor visibility is controlled by RhythmCursor at runtime */
 }
 
 @layer utilities {
