@@ -86,18 +86,21 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <RhythmCursor />
-      <div className="relative min-h-screen grid-bg">
-        <div
-          className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center opacity-40"
-          style={{ backgroundImage: `url(${stageBg})` }}
-        />
-        <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-stage opacity-80" />
-        <Nav />
-        <Outlet />
-        <Footer />
-        <AIMentorWidget />
-      </div>
+      <CursorSettingsProvider>
+        <RhythmCursor />
+        <div className="relative min-h-screen grid-bg">
+          <div
+            className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center opacity-40"
+            style={{ backgroundImage: `url(${stageBg})` }}
+          />
+          <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-stage opacity-80" />
+          <Nav />
+          <Outlet />
+          <Footer />
+          <AIMentorWidget />
+          <CursorSettingsButton />
+        </div>
+      </CursorSettingsProvider>
     </QueryClientProvider>
   );
 }
