@@ -41,7 +41,7 @@ export function CursorSettingsProvider({ children }: { children: ReactNode }) {
 }
 
 export function CursorSettingsButton() {
-  const { prefs, setPrefs } = useCursorPrefs();
+  const { prefs, setPrefs, lowFps } = useCursorPrefs();
   const [open, setOpen] = useState(false);
   const [isFinePointer, setIsFinePointer] = useState(false);
 
