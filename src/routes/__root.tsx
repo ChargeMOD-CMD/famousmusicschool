@@ -1,3 +1,4 @@
+import * as React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -89,11 +90,7 @@ function RootComponent() {
       <CursorSettingsProvider>
         <RhythmCursor />
         <div className="relative min-h-screen grid-bg">
-          <div
-            className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center opacity-40"
-            style={{ backgroundImage: `url(${stageBg})` }}
-          />
-          <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-stage opacity-80" />
+          <StageBackdrop />
           <Nav />
           <Outlet />
           <Footer />
@@ -102,5 +99,56 @@ function RootComponent() {
         </div>
       </CursorSettingsProvider>
     </QueryClientProvider>
+  );
+}
+
+function StageBackdrop() {
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    let raf = 0;
+    let tx = 0, ty = 0, sy = 0;
+
+    const onMove = (e: MouseEvent) => {
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;  // -1..1
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+      tx = nx * 14; // px
+      ty = ny * 10;
+    };
+    const onScroll = () => { sy = window.scrollY * 0.08; };
+
+    let cx = 0, cy = 0;
+    const tick = () => {
+      cx += (tx - cx) * 0.06;
+      cy += (ty - cy) * 0.06;
+      if (ref.current) {
+        ref.current.style.setProperty("--px", `${cx}px`);
+        ref.current.style.setProperty("--py", `${cy + sy}px`);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        ref={ref}
+        className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center opacity-40 animate-stage-drift"
+        style={{ backgroundImage: `url(${stageBg})` }}
+      />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-stage opacity-80" />
+    </>
   );
 }

@@ -5,18 +5,25 @@ export type CursorPrefs = {
   enabled: boolean;
   smoothness: number; // 0.05 (very smooth/laggy) -> 1 (instant)
   trail: number;      // 0..12 trail dots
+  autoPerformance: boolean; // auto-reduce effects when FPS drops
 };
 
-const DEFAULTS: CursorPrefs = { enabled: true, smoothness: 0.45, trail: 6 };
+const DEFAULTS: CursorPrefs = { enabled: true, smoothness: 0.45, trail: 6, autoPerformance: true };
 const STORAGE_KEY = "rhythm-cursor-prefs";
 
-type Ctx = { prefs: CursorPrefs; setPrefs: (p: CursorPrefs) => void };
-const CursorCtx = createContext<Ctx>({ prefs: DEFAULTS, setPrefs: () => {} });
+type Ctx = {
+  prefs: CursorPrefs;
+  setPrefs: (p: CursorPrefs) => void;
+  lowFps: boolean;
+  setLowFps: (v: boolean) => void;
+};
+const CursorCtx = createContext<Ctx>({ prefs: DEFAULTS, setPrefs: () => {}, lowFps: false, setLowFps: () => {} });
 
 export function useCursorPrefs() { return useContext(CursorCtx); }
 
 export function CursorSettingsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefsState] = useState<CursorPrefs>(DEFAULTS);
+  const [lowFps, setLowFps] = useState(false);
 
   useEffect(() => {
     try {
@@ -30,11 +37,11 @@ export function CursorSettingsProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
   };
 
-  return <CursorCtx.Provider value={{ prefs, setPrefs }}>{children}</CursorCtx.Provider>;
+  return <CursorCtx.Provider value={{ prefs, setPrefs, lowFps, setLowFps }}>{children}</CursorCtx.Provider>;
 }
 
 export function CursorSettingsButton() {
-  const { prefs, setPrefs } = useCursorPrefs();
+  const { prefs, setPrefs, lowFps } = useCursorPrefs();
   const [open, setOpen] = useState(false);
   const [isFinePointer, setIsFinePointer] = useState(false);
 
@@ -109,6 +116,24 @@ export function CursorSettingsButton() {
                 <span>None</span><span>Maximum</span>
               </div>
             </div>
+
+            <label className="mt-5 flex items-center justify-between text-sm">
+              <span className="flex flex-col">
+                <span>Performance mode</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Auto-reduce trail/ring on slow FPS
+                  {lowFps && prefs.autoPerformance && (
+                    <span className="ml-1 text-[oklch(0.82_0.16_80)]">• active (low FPS)</span>
+                  )}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                checked={prefs.autoPerformance}
+                onChange={(e) => setPrefs({ ...prefs, autoPerformance: e.target.checked })}
+                className="h-4 w-4 accent-[oklch(0.82_0.16_80)]"
+              />
+            </label>
 
             <button
               onClick={() => setPrefs(DEFAULTS)}

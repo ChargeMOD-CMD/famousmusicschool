@@ -7,7 +7,9 @@ import { useCursorPrefs } from "./CursorSettings";
  * - Smoothness + trail count are user-configurable via CursorSettings.
  */
 export function RhythmCursor() {
-  const { prefs } = useCursorPrefs();
+  const { prefs, setLowFps, lowFps } = useCursorPrefs();
+  const perfMode = prefs.autoPerformance && lowFps;
+  const effectiveTrail = perfMode ? 0 : prefs.trail;
   const orbRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const trailRef = useRef<Array<HTMLDivElement | null>>([]);
@@ -41,7 +43,7 @@ export function RhythmCursor() {
     let mx = window.innerWidth / 2;
     let my = window.innerHeight / 2;
     let rx = mx, ry = my;
-    const trailCount = prefs.trail;
+    const trailCount = effectiveTrail;
     const lerp = prefs.smoothness; // higher = snappier
     const trail = Array(trailCount).fill(0).map(() => ({ x: mx, y: my }));
 
@@ -54,6 +56,12 @@ export function RhythmCursor() {
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
+
+    // FPS sampling — flag low FPS so the provider can broadcast performance mode.
+    let frames = 0;
+    let fpsStart = performance.now();
+    let lowStreak = 0;
+    let highStreak = 0;
 
     let raf = 0;
     const tick = () => {
@@ -70,6 +78,20 @@ export function RhythmCursor() {
         px = trail[i].x;
         py = trail[i].y;
       }
+
+      // FPS measurement window: ~1s
+      frames++;
+      const now = performance.now();
+      const elapsed = now - fpsStart;
+      if (elapsed >= 1000) {
+        const fps = (frames * 1000) / elapsed;
+        frames = 0;
+        fpsStart = now;
+        if (fps < 40) { lowStreak++; highStreak = 0; } else { highStreak++; lowStreak = 0; }
+        if (lowStreak >= 1) setLowFps(true);
+        else if (highStreak >= 3) setLowFps(false);
+      }
+
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -78,7 +100,7 @@ export function RhythmCursor() {
       window.removeEventListener("mousemove", handleMove);
       cancelAnimationFrame(raf);
     };
-  }, [isFinePointer, prefs.enabled, prefs.smoothness, prefs.trail]);
+  }, [isFinePointer, prefs.enabled, prefs.smoothness, effectiveTrail, setLowFps]);
 
   // Toggle native cursor visibility based on enabled state
   useEffect(() => {
@@ -112,7 +134,7 @@ export function RhythmCursor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[9999] hidden md:block">
-      {Array.from({ length: prefs.trail }).map((_, i) => (
+      {Array.from({ length: effectiveTrail }).map((_, i) => (
         <div
           key={i}
           ref={(el) => { trailRef.current[i] = el; }}
@@ -123,12 +145,14 @@ export function RhythmCursor() {
           }}
         />
       ))}
-      <div
-        ref={ringRef}
-        className={`absolute h-12 w-12 rounded-full border transition-all duration-300 ${
-          hovering ? "scale-150 border-[oklch(0.82_0.16_80)]" : "scale-100 border-[oklch(0.65_0.25_295/0.6)]"
-        }`}
-      />
+      {!perfMode && (
+        <div
+          ref={ringRef}
+          className={`absolute h-12 w-12 rounded-full border transition-all duration-300 ${
+            hovering ? "scale-150 border-[oklch(0.82_0.16_80)]" : "scale-100 border-[oklch(0.65_0.25_295/0.6)]"
+          }`}
+        />
+      )}
       <div
         ref={orbRef}
         className={`absolute h-5 w-5 rounded-full transition-all duration-200 ${
