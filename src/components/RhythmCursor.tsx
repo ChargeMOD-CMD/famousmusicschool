@@ -7,7 +7,9 @@ import { useCursorPrefs } from "./CursorSettings";
  * - Smoothness + trail count are user-configurable via CursorSettings.
  */
 export function RhythmCursor() {
-  const { prefs } = useCursorPrefs();
+  const { prefs, setLowFps, lowFps } = useCursorPrefs();
+  const perfMode = prefs.autoPerformance && lowFps;
+  const effectiveTrail = perfMode ? 0 : prefs.trail;
   const orbRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const trailRef = useRef<Array<HTMLDivElement | null>>([]);
