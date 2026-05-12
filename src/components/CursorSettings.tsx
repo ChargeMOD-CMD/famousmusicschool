@@ -117,6 +117,24 @@ export function CursorSettingsButton() {
               </div>
             </div>
 
+            <label className="mt-5 flex items-center justify-between text-sm">
+              <span className="flex flex-col">
+                <span>Performance mode</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Auto-reduce trail/ring on slow FPS
+                  {lowFps && prefs.autoPerformance && (
+                    <span className="ml-1 text-[oklch(0.82_0.16_80)]">• active (low FPS)</span>
+                  )}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                checked={prefs.autoPerformance}
+                onChange={(e) => setPrefs({ ...prefs, autoPerformance: e.target.checked })}
+                className="h-4 w-4 accent-[oklch(0.82_0.16_80)]"
+              />
+            </label>
+
             <button
               onClick={() => setPrefs(DEFAULTS)}
               className="mt-6 w-full text-xs text-muted-foreground hover:text-foreground transition"
