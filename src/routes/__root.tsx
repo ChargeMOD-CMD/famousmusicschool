@@ -14,6 +14,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { RhythmCursor } from "@/components/RhythmCursor";
 import { AIMentorWidget } from "@/components/AIMentorWidget";
+import { CursorSettingsProvider, CursorSettingsButton } from "@/components/CursorSettings";
 
 function NotFoundComponent() {
   return (
