@@ -5,18 +5,25 @@ export type CursorPrefs = {
   enabled: boolean;
   smoothness: number; // 0.05 (very smooth/laggy) -> 1 (instant)
   trail: number;      // 0..12 trail dots
+  autoPerformance: boolean; // auto-reduce effects when FPS drops
 };
 
-const DEFAULTS: CursorPrefs = { enabled: true, smoothness: 0.45, trail: 6 };
+const DEFAULTS: CursorPrefs = { enabled: true, smoothness: 0.45, trail: 6, autoPerformance: true };
 const STORAGE_KEY = "rhythm-cursor-prefs";
 
-type Ctx = { prefs: CursorPrefs; setPrefs: (p: CursorPrefs) => void };
-const CursorCtx = createContext<Ctx>({ prefs: DEFAULTS, setPrefs: () => {} });
+type Ctx = {
+  prefs: CursorPrefs;
+  setPrefs: (p: CursorPrefs) => void;
+  lowFps: boolean;
+  setLowFps: (v: boolean) => void;
+};
+const CursorCtx = createContext<Ctx>({ prefs: DEFAULTS, setPrefs: () => {}, lowFps: false, setLowFps: () => {} });
 
 export function useCursorPrefs() { return useContext(CursorCtx); }
 
 export function CursorSettingsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefsState] = useState<CursorPrefs>(DEFAULTS);
+  const [lowFps, setLowFps] = useState(false);
 
   useEffect(() => {
     try {
@@ -30,7 +37,7 @@ export function CursorSettingsProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
   };
 
-  return <CursorCtx.Provider value={{ prefs, setPrefs }}>{children}</CursorCtx.Provider>;
+  return <CursorCtx.Provider value={{ prefs, setPrefs, lowFps, setLowFps }}>{children}</CursorCtx.Provider>;
 }
 
 export function CursorSettingsButton() {
