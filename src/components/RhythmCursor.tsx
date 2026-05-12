@@ -134,7 +134,7 @@ export function RhythmCursor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[9999] hidden md:block">
-      {Array.from({ length: prefs.trail }).map((_, i) => (
+      {Array.from({ length: effectiveTrail }).map((_, i) => (
         <div
           key={i}
           ref={(el) => { trailRef.current[i] = el; }}
@@ -145,12 +145,14 @@ export function RhythmCursor() {
           }}
         />
       ))}
-      <div
-        ref={ringRef}
-        className={`absolute h-12 w-12 rounded-full border transition-all duration-300 ${
-          hovering ? "scale-150 border-[oklch(0.82_0.16_80)]" : "scale-100 border-[oklch(0.65_0.25_295/0.6)]"
-        }`}
-      />
+      {!perfMode && (
+        <div
+          ref={ringRef}
+          className={`absolute h-12 w-12 rounded-full border transition-all duration-300 ${
+            hovering ? "scale-150 border-[oklch(0.82_0.16_80)]" : "scale-100 border-[oklch(0.65_0.25_295/0.6)]"
+          }`}
+        />
+      )}
       <div
         ref={orbRef}
         className={`absolute h-5 w-5 rounded-full transition-all duration-200 ${
