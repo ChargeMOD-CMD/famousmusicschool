@@ -43,7 +43,7 @@ export function RhythmCursor() {
     let mx = window.innerWidth / 2;
     let my = window.innerHeight / 2;
     let rx = mx, ry = my;
-    const trailCount = prefs.trail;
+    const trailCount = effectiveTrail;
     const lerp = prefs.smoothness; // higher = snappier
     const trail = Array(trailCount).fill(0).map(() => ({ x: mx, y: my }));
 
@@ -56,6 +56,12 @@ export function RhythmCursor() {
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
+
+    // FPS sampling — flag low FPS so the provider can broadcast performance mode.
+    let frames = 0;
+    let fpsStart = performance.now();
+    let lowStreak = 0;
+    let highStreak = 0;
 
     let raf = 0;
     const tick = () => {
@@ -72,6 +78,20 @@ export function RhythmCursor() {
         px = trail[i].x;
         py = trail[i].y;
       }
+
+      // FPS measurement window: ~1s
+      frames++;
+      const now = performance.now();
+      const elapsed = now - fpsStart;
+      if (elapsed >= 1000) {
+        const fps = (frames * 1000) / elapsed;
+        frames = 0;
+        fpsStart = now;
+        if (fps < 40) { lowStreak++; highStreak = 0; } else { highStreak++; lowStreak = 0; }
+        if (lowStreak >= 1) setLowFps(true);
+        else if (highStreak >= 3) setLowFps(false);
+      }
+
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -80,7 +100,7 @@ export function RhythmCursor() {
       window.removeEventListener("mousemove", handleMove);
       cancelAnimationFrame(raf);
     };
-  }, [isFinePointer, prefs.enabled, prefs.smoothness, prefs.trail]);
+  }, [isFinePointer, prefs.enabled, prefs.smoothness, effectiveTrail, setLowFps]);
 
   // Toggle native cursor visibility based on enabled state
   useEffect(() => {
